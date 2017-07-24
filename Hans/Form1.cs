@@ -30,5 +30,14 @@ namespace Hans
         {
             Application.Exit();
         }
+
+        private void productToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Master_Product form = new Master_Product();
+            form.TopLevel = false;
+            form.Parent = this;
+            form.StartPosition = FormStartPosition.CenterScreen;
+            form.Show();
+        }
     }
 }
