@@ -22,7 +22,13 @@ namespace Hans
             Master_Customer form=new Master_Customer();
             form.TopLevel = false;
             form.Parent = this;
+            form.StartPosition = FormStartPosition.CenterScreen;
             form.Show();
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
     }
 }
