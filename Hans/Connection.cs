@@ -9,7 +9,7 @@ namespace Hans
 {
     class Connection
     {
-        private static OleDbConnection oleConn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.15.0;Data Source=" + AppDomain.CurrentDomain.BaseDirectory+ "\\POS.accdb");
+        private static OleDbConnection oleConn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + AppDomain.CurrentDomain.BaseDirectory+ "\\POS.accdb");
         public static OleDbConnection getConnection()
         {
             return oleConn;

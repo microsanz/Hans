@@ -39,5 +39,14 @@ namespace Hans
             form.StartPosition = FormStartPosition.CenterScreen;
             form.Show();
         }
+
+        private void penjualanToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Transaksi_Penjualan form = new Transaksi_Penjualan();
+            form.TopLevel = false;
+            form.Parent = this;
+            form.StartPosition = FormStartPosition.CenterScreen;
+            form.Show();
+        }
     }
 }

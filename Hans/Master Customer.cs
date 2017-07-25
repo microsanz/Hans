@@ -52,7 +52,6 @@ namespace Hans
             oDA.Fill(oDT);
             dataGridView1.DataSource = oDT;
         }
-
         private void button1_Click(object sender, EventArgs e)
         {
             if(oDT.Rows.Count==0)
