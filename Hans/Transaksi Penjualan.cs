@@ -28,7 +28,7 @@ namespace Hans
         private void showPenjualan()
         {
             oDTHelper = new DataTable();
-            command = new OleDbCommand("select SaleCode as 'Kode Penjualan', SaleDate as 'Tanggal Penjualan', CustomerCode as 'Kode Customer' from Sale", Connection.getConnection());
+            command = new OleDbCommand("select SaleCode as [Kode Penjualan], SaleDate as [Tanggal Penjualan], CustomerCode as [Kode Customer] from Sale", Connection.getConnection());
             oDA = new OleDbDataAdapter(command);
             oDA.Fill(oDTHelper);
             dataGridView1.DataSource = oDTHelper;
@@ -36,7 +36,7 @@ namespace Hans
         private void showCustomer()
         {
             oDTHelper = new DataTable();
-            command = new OleDbCommand("select CustomerCode as 'Kode Customer', CustomerName as 'Nama Customer', CustomerAddress as 'Alamat Customer' from Customer", Connection.getConnection());
+            command = new OleDbCommand("select CustomerCode as [Kode Customer], CustomerName as [Nama Customer], CustomerAddress as [Alamat Customer] from Customer", Connection.getConnection());
             oDA = new OleDbDataAdapter(command);
             oDA.Fill(oDTHelper);
             dataGridView1.DataSource = oDTHelper;
@@ -44,7 +44,7 @@ namespace Hans
         private void showProduct()
         {
             oDTHelper = new DataTable();
-            command = new OleDbCommand("select ProductCode as 'Kode Produk', ProductName as 'Nama Produk', ProductQuantity as 'Jumlah Produk', ProductPrice as 'Harga Produk' from Product", Connection.getConnection());
+            command = new OleDbCommand("select ProductCode as [Kode Produk], ProductName as [Nama Produk], ProductQuantity as [Jumlah Produk], ProductPrice as [Harga Produk] from Product", Connection.getConnection());
             oDA = new OleDbDataAdapter(command);
             oDA.Fill(oDTHelper);
             dataGridView1.DataSource = oDTHelper;
@@ -93,7 +93,7 @@ namespace Hans
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
             oDTHelper = new DataTable();
-            command = new OleDbCommand("select CustomerCode as 'Kode Customer', CustomerName as 'Nama Customer', CustomerAddress as 'Alamat Customer' from Customer where CustomerCode like @CustomerCode", Connection.getConnection());
+            command = new OleDbCommand("select CustomerCode as [Kode Customer], CustomerName as [Nama Customer], CustomerAddress as [Alamat Customer] from Customer where CustomerCode like @CustomerCode", Connection.getConnection());
             //OleDbParameter param = new OleDbParameter("@CustomerCode", OleDbType.VarChar);
             //param.Value =textBox1.Text;
             command.Parameters.Add("@CustomerCode", OleDbType.VarChar).Value = "%" + textBox3.Text + "%";
@@ -115,7 +115,7 @@ namespace Hans
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             oDTHelper = new DataTable();
-            command = new OleDbCommand("select SaleCode as 'Kode Penjualan', SaleDate as 'Tanggal Penjualan' , CustomerCode as 'Kode Customer' from Sale where SaleCode like @SaleCode", Connection.getConnection());
+            command = new OleDbCommand("select SaleCode as [Kode Penjualan], SaleDate as [Tanggal Penjualan] , CustomerCode as [Kode Customer] from Sale where SaleCode like @SaleCode", Connection.getConnection());
             command.Parameters.Add("@SaleCode", OleDbType.VarChar).Value = "%" + textBox1.Text + "%";
             oDA = new OleDbDataAdapter(command);
             oDA.Fill(oDTHelper);
@@ -126,7 +126,17 @@ namespace Hans
         {
             if (focusParam == 0)
             {
+                DateTime dt= new DateTime();
                 textBox1.Text = oDTHelper.Rows[e.RowIndex][0].ToString();
+                DateTime.TryParse(oDTHelper.Rows[0][1].ToString(),out dt);
+                dateTimePicker1.Value = dt;
+                oDTDetail = new DataTable();
+                command = new OleDbCommand("SELECT saledetail.productcode as [Kode Produk], saledetail.ProductQuantity as [Jumlah Produk], product.ProductPrice as [Harga Per Item], saledetail.ProductQuantity * product.ProductPrice as [Total Harga] FROM saledetail INNER JOIN product ON saledetail.productcode = product.productcode where saledetail.SaleCode = @SaleCode", Connection.getConnection());
+                command.Parameters.Add("@SaleCode", OleDbType.VarChar).Value = textBox1.Text;
+                oDA = new OleDbDataAdapter(command);
+                oDA.Fill(oDTDetail);
+                dataGridView2.DataSource = oDTDetail;
+                textBox3.Text = oDTHelper.Rows[0][2].ToString();
             }
             else if (focusParam == 1)
             {
@@ -195,27 +205,27 @@ namespace Hans
                         Connection.Close();
                     }
                 }
-                else
+            }
+            else
+            {
+                Connection.Open();
+                command = new OleDbCommand("insert into Sale values (@SaleCode, @SaleDate, @CustomerCode)", Connection.getConnection());
+                command.Parameters.Add("@SaleCode", OleDbType.VarChar).Value = textBox1.Text;
+                command.Parameters.Add("@SaleDate", OleDbType.Date).Value = dateTimePicker1.Value;
+                command.Parameters.Add("@CustomerCode", OleDbType.VarChar).Value = textBox3.Text;
+                command.ExecuteNonQuery();
+                Connection.Close();
+
+                for (int i = 0; i < oDTDetail.Rows.Count; i++)
                 {
                     Connection.Open();
-                    command = new OleDbCommand("insert into Sale values (@SaleCode, @SaleDate, @CustomerCode)", Connection.getConnection());
+                    command = new OleDbCommand("insert into SaleDetail values (@SaleCode, @ProductCode, @ProductQuantity)", Connection.getConnection());
                     command.Parameters.Add("@SaleCode", OleDbType.VarChar).Value = textBox1.Text;
-                    command.Parameters.Add("@SaleDate", OleDbType.VarChar).Value = dateTimePicker1.Value;
-                    command.Parameters.Add("@CustomerCode", OleDbType.VarChar).Value = textBox3.Text;
+                    command.Parameters.Add("@ProductCode", OleDbType.VarChar).Value = oDTDetail.Rows[i][0].ToString();
+                    command.Parameters.Add("@ProductQuantity", OleDbType.Numeric).Value = Convert.ToInt32(oDTDetail.Rows[i][1].ToString());
                     command.ExecuteNonQuery();
                     Connection.Close();
-
-                    for (int i = 0; i < oDTHelper.Rows.Count; i++)
-                    {
-                        Connection.Open();
-                        command = new OleDbCommand("insert into SaleDetail values (@SaleCode, @ProductCode, @ProductQuantity)", Connection.getConnection());
-                        command.Parameters.Add("@SaleCode", OleDbType.VarChar).Value = textBox1.Text;
-                        command.Parameters.Add("@ProductCode", OleDbType.VarChar).Value = textBox6.Text;
-                        command.Parameters.Add("@ProductQuantity", OleDbType.Numeric).Value = numericUpDown1.Value;
-                        command.ExecuteNonQuery();
-                        Connection.Close();
-                    }
-                }
+                }            
             }
             ClearField();
             showPenjualan();
@@ -244,16 +254,26 @@ namespace Hans
             {
                 Connection.Open();
                 command = new OleDbCommand("delete from Sale where SaleCode = @SaleCode", Connection.getConnection());
-                command.Parameters.Add("@SaleCode", OleDbType.VarChar).Value = "%" + textBox1.Text + "%";
+                command.Parameters.Add("@SaleCode", OleDbType.VarChar).Value = textBox1.Text;
                 command.ExecuteNonQuery();
                 Connection.Close();
 
                 Connection.Open();
                 command = new OleDbCommand("delete from SaleDetail where SaleCode = @SaleCode", Connection.getConnection());
-                command.Parameters.Add("@SaleCode", OleDbType.VarChar).Value = "%" + textBox1.Text + "%";
+                command.Parameters.Add("@SaleCode", OleDbType.VarChar).Value = textBox1.Text;
                 command.ExecuteNonQuery();
                 Connection.Close();
             }
+            ClearField();
+            showPenjualan();
+        }
+
+        private void dataGridView2_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            textBox6.Text = oDTDetail.Rows[e.RowIndex][0].ToString();
+            numericUpDown1.Value= Convert.ToInt32(oDTDetail.Rows[e.RowIndex][1].ToString());
+            textBox4.Text = oDTDetail.Rows[e.RowIndex][2].ToString();
+            textBox7.Text = oDTDetail.Rows[e.RowIndex][3].ToString();
         }
     }
 }
